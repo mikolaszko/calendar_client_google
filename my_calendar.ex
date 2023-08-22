@@ -20,4 +20,16 @@ defmodule MyCalendar do
     |> Map.values()
     |> Enum.filter(&(&1.date == date))
   end
+
+  def update_entry(task_list, id, updater_func) do
+    case Map.fetch(task_list.entries, id) do
+      :error -> task_list
+      {:ok, old_entry} ->
+        new_entry = updater_func.(old_entry)
+        new_entries = Map.put(task_list.entries, new_entry.id, new_entry)
+        %MyCalendar{task_list | entries: new_entries}
+    end
+  end
+
+  def delete_entry(task_list, id), do: Map.delete(task_list.entries, id)
 end
