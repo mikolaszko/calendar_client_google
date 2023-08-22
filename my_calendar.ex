@@ -49,17 +49,19 @@ defmodule MyCalendar do
 end
 
 defmodule MyCalendar.CsvImporter do
-  def read_file(path), do: File.stream!(path)
+  defp read_file(path), do: File.stream!(path)
   
   def init(path) do
     stream = read_file(path) |>
       Stream.map(fn item -> 
-        String.trim_trailing(item) |>
-        String.split(",") |>
-      end)
+          String.trim_trailing(item) |>
+          String.split(",")
+        end
+      )
 
-    Enum.each(stream, fn [date | title] -> 
-      
-    end)
+    Enum.map(stream, fn [date | title]-> 
+      %{date: date |> Date.from_iso8601() |> elem(1), title: title}
+    end) |> 
+    MyCalendar.new()
   end
 end
