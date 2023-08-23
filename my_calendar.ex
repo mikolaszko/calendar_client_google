@@ -1,4 +1,17 @@
 defmodule MyCalendar do
+
+  defimpl Collectable, for: MyCalendar do
+    def into(original) do
+      {original, &into_callback/2}
+    end
+
+    defp into_callback(task_list, {:cont, entry}) do
+      MyCalendar.add_entry(task_list, entry)
+    end
+
+    defp into_callback(task_list, :done), do: task_list 
+    defp into_callback(task_list, :halt), do: :ok
+  end
   defstruct next_id: 1, entries: %{}
 
   def new(entries \\ []) do
