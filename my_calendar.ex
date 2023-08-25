@@ -1,3 +1,38 @@
+defmodule MyCalendarServer do
+  def start do
+    spawn(fn -> loop(MyCalendar.new()) end)
+  end  
+
+  defp loop(task_list) do
+    new_task_list =
+      receive do
+        message -> process_message(task_list, message)
+      end
+  end
+
+  def add_entry(my_calendar_server, new_entry) do
+    send(my_calendar_server, {:add_entry, new_entry})
+  end
+
+  def entries(my_calendar_server, date) do
+    send(my_calendar_server, {:entries, self(), date})
+
+    receive do
+      {:task_entries, entries} -> entries
+    after
+      5000 -> {:error, :timeout}
+    end
+  end
+
+  defp process_message(task_list, {:add_entry, new_entry}) do
+    MyCalendar.add_entry(task_list, new_entry)
+  end
+  defp process_message(task_list, {:entries, caller, date}) do
+    send(caller, {:task_entries}, MyCalendar.entries(task_list, date))
+    task_list
+  end
+end
+
 defmodule MyCalendar do
 
   defimpl Collectable, for: MyCalendar do
